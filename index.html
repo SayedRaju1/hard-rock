@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Hard Rock Solution - Song Lyric App</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <!-- Custom css -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <nav class="navbar  navbar-dark my-3">
+            <a class="navbar-brand" href="#">
+                <img src="images/logo.png" alt="Hard Rock Solution">
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavId"
+                aria-controls="collapsibleNavId" aria-expanded="false" aria-label="Toggle navigation">
+                <img src="images/toggler-icon.svg" alt="">
+            </button>
+            <div class="collapse navbar-collapse" id="collapsibleNavId">
+                <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Link</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="dropdownId" data-toggle="dropdown"
+                            aria-haspopup="true" aria-expanded="false">Dropdown</a>
+                        <div class="dropdown-menu" aria-labelledby="dropdownId">
+                            <a class="dropdown-item" href="#">Action 1</a>
+                            <a class="dropdown-item" href="#">Action 2</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <div id="newSearch" class="d-flex justify-content-center">
+            <button id='newBtn' class="btn btn-danger">New Search</button>
+        </div><br>
+        <main class="content-area">
+            <div class="search-bar col-md-6 col-sm-12 mx-auto">
+                <h1 id="lyricsSearchText" class="text-center">Lyrics Search</h1>
+                <div id="search-box" class="search-box my-5">
+                    <input id="name-input" type="text" class="form-control" placeholder="Enter your artist song name">
+                    <button id="btn-search" class="btn btn-success search-btn">Search</button>
+
+                </div>
+            </div>
+    </div>
+
+
+    <!-- === Fancy results === -->
+    <div id="search-result" class="search-result col-md-8 mx-auto py-4">
+
+    </div>
+    <!-- Single Lyrics -->
+    <div id="single-lyric" class="single-lyrics text-center">
+
+    </div>
+
+
+
+
+    </main>
+    </div>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+    <!-- Custom Script Here -->
+    <script>
+
+        document.getElementById('btn-search').addEventListener('click', function () {
+            searchText = document.getElementById('name-input').value;
+            document.getElementById('search-result').style.display = "block";
+
+
+
+            fetch('https://api.lyrics.ovh/suggest/' + searchText)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('search-result').innerHTML = '';
+                    for (let i = 0; i < 10; i++) {
+                        const song = data.data[i];
+                        const title = song.title;
+                        const artist = song.artist.name;
+                        const coverImage = song.preview;
+                        console.log(coverImage);
+                        const div = document.createElement('div');
+                        div.innerHTML = `<div class="single-result row align-items-center my-3 p-3">
+                        <div class="col-md-9">
+                        <h3 class="lyrics-name">${title}</h3>
+                        <p class="author lead">Album by <span>${artist}</span></p>
+                        <audio controls>
+                        <source src="${coverImage}" type="audio/mp3">
+                        </audio>
+                        
+                        </div>
+                        <div class="col-md-3 text-md-right text-center">
+                        <button id="lyric-btn" onclick="getLyric('${artist}', '${title}')" class="btn btn-success lyric-btn">Get Lyrics</button>
+                        </div>
+                        </div>`;
+
+                        document.getElementById('search-result').appendChild(div);
+                    }
+
+                })
+        })
+
+        function getLyric(singer, trackName) {
+            document.getElementById('newBtn').style.display = "block";
+            fetch(`https://api.lyrics.ovh/v1/${singer}/${trackName}`)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('search-result').style.display = "none";
+                    document.getElementById('search-box').style.display = "none";
+                    const lyricArea = document.createElement('div')
+                    lyricArea.innerHTML = `<h2 class="text-success mb-4">${trackName} - ${singer}</h2>
+                    <pre id="lyric" class="lyric text-white"></pre>`;
+                    document.getElementById('single-lyric').appendChild(lyricArea);
+                    document.getElementById('lyric').innerText = data.lyrics;
+
+                })
+        }
+
+        document.getElementById('newBtn').style.display = "none";
+        document.getElementById('newBtn').addEventListener("click", function () {
+            document.getElementById('single-lyric').innerHTML = '';
+            document.getElementById('search-result').innerHTML = '';
+            document.getElementById('search-result').style.display = "block";
+            document.getElementById('search-box').style.display = "block";
+            document.getElementById('newBtn').style.display = "none";
+        })
+
+
+
+    </script>
+
+</body>
+
+</html>
